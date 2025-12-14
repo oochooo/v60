@@ -17,15 +17,14 @@ const recipes = {
   },
   iced: {
     baseSteps: [
-      { time: 0, instruction: "Pour for bloom", water: 40 },
-      { time: 45, instruction: "First pour", water: 100 },
-      { time: 75, instruction: "Second pour", water: 160 },
-      { time: 105, instruction: "Third pour", water: 220 },
-      { time: 135, instruction: "Final pour", water: 300 },
-      { time: 180, instruction: "Swirl & serve", water: 300 },
+      { time: 0, instruction: "Pour for bloom", water: 90 },
+      { time: 10, instruction: "Stir bloom", water: 90 },
+      { time: 20, instruction: "Let bloom", water: 90 },
+      { time: 45, instruction: "Pour remaining water slowly", water: 500 },
+      { time: 60*2.5, instruction: "Swirl carafe, serve on fresh ice", water: 500 },
     ],
-    coffee: 30,
-    water: 300,
+    coffee: 32.5,
+    water: 500,
     ice: 200,
     grind: "Fine (toward aeropress)"
   }
@@ -148,10 +147,10 @@ export default function V60Timer() {
         ))}
       </div>
       
-      <p style={{ color: '#888',}}>
-        {coffee}g coffee • {water}g water{ice > 0 && ` • ${ice}g ice`}
+      <p style={{ color: '#888' }}>
+        {coffee}g coffee • {water}g water{ice > 0 && ` • ${ice}g ice in carafe`}
       </p>
-      <p style={{ color: '#666', fontSize: 12, }}>
+      <p style={{ color: '#666', fontSize: 12 }}>
         Grind: {recipe.grind}
       </p>
 
