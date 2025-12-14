@@ -30,6 +30,53 @@ const recipes = {
   }
 };
 
+function PillToggle({ options, value, onChange, colors }) {
+  const selectedIndex = options.findIndex(o => o.value === value);
+  
+  return (
+    <div style={{
+      display: 'flex',
+      background: '#333',
+      borderRadius: 20,
+      padding: 4,
+      position: 'relative'
+    }}>
+      <div style={{
+        position: 'absolute',
+        top: 4,
+        left: 4,
+        width: `calc(${100 / options.length}% - 4px)`,
+        height: 'calc(100% - 8px)',
+        background: colors?.[value] || '#2563eb',
+        borderRadius: 16,
+        transition: 'transform 0.2s ease, background 0.2s ease',
+        transform: `translateX(${selectedIndex * 100}%)`
+      }} />
+      {options.map(opt => (
+        <button
+          key={opt.value}
+          onClick={() => onChange(opt.value)}
+          style={{
+            background: 'transparent',
+            border: 'none',
+            outline: 'none',
+            borderRadius: 16,
+            padding: '8px 20px',
+            color: 'white',
+            cursor: 'pointer',
+            fontSize: 14,
+            position: 'relative',
+            zIndex: 1,
+            transition: 'color 0.2s'
+          }}
+        >
+          {opt.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export default function V60Timer() {
   const [mode, setMode] = useState('hot');
   const [multiplier, setMultiplier] = useState(0.5);
@@ -44,6 +91,15 @@ export default function V60Timer() {
   const water = recipe.water * multiplier;
   const ice = recipe.ice * multiplier;
   const steps = recipe.baseSteps.map(s => ({ ...s, water: s.water * multiplier }));
+
+  const lastStepTime = steps[steps.length - 1].time;
+  const isComplete = isRunning && currentStepIndex === steps.length - 1 && seconds >= lastStepTime + 5;
+
+  useEffect(() => {
+    if (isComplete) {
+      reset();
+    }
+  }, [isComplete]);
 
   useEffect(() => {
     if (isRunning) {
@@ -101,58 +157,40 @@ export default function V60Timer() {
       background: '#1a1a1a',
       color: 'white'
     }}>
-      <h1 style={{ marginBottom: 4, fontWeight: 300, fontSize: 24 }}>V60 Recipe</h1>
       
-      {/* Mode toggle */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
-        {['hot', 'iced'].map(m => (
-          <button
-            key={m}
-            onClick={() => !isRunning && setMode(m)}
-            disabled={isRunning}
-            style={{
-              background: mode === m ? (m === 'iced' ? '#0891b2' : '#dc2626') : '#333',
-              border: 'none',
-              borderRadius: 20,
-              padding: '8px 16px',
-              color: isRunning ? '#666' : 'white',
-              cursor: isRunning ? 'not-allowed' : 'pointer',
-              fontSize: 14
-            }}
-          >
-            {m === 'iced' ? '🧊 Iced' : '☕ Hot'}
-          </button>
-        ))}
-      </div>
-
-      {/* Size toggle */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
-        {[0.5, 1].map(m => (
-          <button
-            key={m}
-            onClick={() => !isRunning && setMultiplier(m)}
-            disabled={isRunning}
-            style={{
-              background: multiplier === m ? '#2563eb' : '#333',
-              border: 'none',
-              borderRadius: 20,
-              padding: '8px 16px',
-              color: isRunning ? '#666' : 'white',
-              cursor: isRunning ? 'not-allowed' : 'pointer',
-              fontSize: 14
-            }}
-          >
-            {m === 1 ? '2 cups' : '1 cup'}
-          </button>
-        ))}
-      </div>
-      
-      <p style={{ color: '#888' }}>
-        {coffee}g coffee • {water}g water{ice > 0 && ` • ${ice}g ice in carafe`}
-      </p>
-      <p style={{ color: '#666', fontSize: 12 }}>
-        Grind: {recipe.grind}
-      </p>
+      {!isRunning && (
+        <>
+          <h1 style={{ marginBottom: 16, fontWeight: 300, fontSize: 24 }}>V60 Recipe</h1>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 16 }}>
+            <PillToggle
+              options={[
+                { value: 'hot', label: '☕' },
+                { value: 'iced', label: '🧊 ' }
+              ]}
+              value={mode}
+              onChange={setMode}
+              colors={{ hot: '#dc2626', iced: '#0891b2' }}
+            />
+            
+            <PillToggle
+              options={[
+                { value: 0.5, label: '1x' },
+                { value: 1, label: '2x' }
+              ]}
+              value={multiplier}
+              onChange={setMultiplier}
+            />
+          </div>
+          
+          <p style={{ color: '#888' }}>
+            {coffee}g beans • {water}ml h2o {ice > 0 && ` • ${ice}g ice`}
+          </p>
+          <p style={{ color: '#666', fontSize: 12 }}>
+            Grind: {recipe.grind}
+          </p>
+        </>
+      )}
 
       <div style={{ 
         fontSize: 'min(30vw, 180px)', 
@@ -161,7 +199,7 @@ export default function V60Timer() {
         letterSpacing: '-0.02em',
         lineHeight: 1,
         marginBottom: 40,
-        marginTop: 10
+        marginTop: isRunning ? 40 : 10
       }}>
         {formatTime(seconds)}
       </div>
