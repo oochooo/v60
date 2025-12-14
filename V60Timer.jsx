@@ -8,7 +8,7 @@ const recipes = {
       { time: 75, instruction: "Second pour", water: 250 },
       { time: 105, instruction: "Third pour", water: 350 },
       { time: 135, instruction: "Final pour", water: 500 },
-      { time: 210, instruction: "Drawdown complete", water: 500 },
+      { time: 210, instruction: "Serve", water: 500 },
     ],
     coffee: 30,
     water: 500,
@@ -20,8 +20,8 @@ const recipes = {
       { time: 0, instruction: "Pour for bloom", water: 90 },
       { time: 10, instruction: "Stir bloom", water: 90 },
       { time: 20, instruction: "Let bloom", water: 90 },
-      { time: 45, instruction: "Pour remaining water slowly", water: 500 },
-      { time: 60*2.5, instruction: "Swirl carafe, serve on fresh ice", water: 500 },
+      { time: 45, instruction: "Pour the rest", water: 500 },
+      { time: 60*2.5, instruction: "Swirl and serve on ice", water: 500 },
     ],
     coffee: 32.5,
     water: 500,
@@ -150,17 +150,28 @@ export default function V60Timer() {
     <div style={{ 
       fontFamily: 'system-ui', 
       minHeight: '100vh',
+      minWidth: '100vw',
+      width: '100%',
+      height: '100%',
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
-      padding: 40,
+      padding: 'clamp(16px, 5vw, 40px)',
       background: '#1a1a1a',
-      color: 'white'
+      color: 'white',
+      boxSizing: 'border-box',
+      overflow: 'auto'
     }}>
       
       {!isRunning && (
         <>
-          <h1 style={{ marginBottom: 16, fontWeight: 300, fontSize: 24 }}>V60 Recipe</h1>
+          <h1 style={{ 
+            marginBottom: 16, 
+            fontWeight: 300, 
+            fontSize: 'clamp(20px, 5vw, 24px)' 
+          }}>
+            James Hoffmann's V60 technique
+          </h1>
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 16 }}>
             <PillToggle
@@ -183,34 +194,34 @@ export default function V60Timer() {
             />
           </div>
           
-          <p style={{ color: '#888' }}>
-            {coffee}g beans • {water}ml h2o {ice > 0 && ` • ${ice}g ice`}
+          <p style={{ color: '#888', fontSize: 'clamp(14px, 3vw, 16px)' }}>
+            {coffee}g beans • {water}g water {ice > 0 && ` • ${ice}g ice`}
           </p>
-          <p style={{ color: '#666', fontSize: 12 }}>
+          <p style={{ color: '#666', fontSize: 'clamp(11px, 2.5vw, 12px)' }}>
             Grind: {recipe.grind}
           </p>
         </>
       )}
 
       <div style={{ 
-        fontSize: 'min(30vw, 180px)', 
+        fontSize: 'clamp(80px, 25vw, 180px)', 
         fontWeight: 200,
         fontVariantNumeric: 'tabular-nums',
         letterSpacing: '-0.02em',
         lineHeight: 1,
-        marginBottom: 40,
-        marginTop: isRunning ? 40 : 10
+        marginBottom: 'clamp(20px, 5vw, 40px)',
+        marginTop: isRunning ? 'clamp(20px, 5vw, 40px)' : 10
       }}>
         {formatTime(seconds)}
       </div>
 
-      <div style={{ marginBottom: 40 }}>
+      <div style={{ marginBottom: 'clamp(20px, 5vw, 40px)' }}>
         {!isRunning ? (
           <button 
             onClick={start}
             style={{
-              padding: '16px 64px',
-              fontSize: 24,
+              padding: 'clamp(12px, 3vw, 16px) clamp(40px, 10vw, 64px)',
+              fontSize: 'clamp(18px, 4vw, 24px)',
               background: '#22c55e',
               color: 'white',
               border: 'none',
@@ -225,8 +236,8 @@ export default function V60Timer() {
           <button 
             onClick={reset}
             style={{
-              padding: '16px 64px',
-              fontSize: 24,
+              padding: 'clamp(12px, 3vw, 16px) clamp(40px, 10vw, 64px)',
+              fontSize: 'clamp(18px, 4vw, 24px)',
               background: '#dc2626',
               color: 'white',
               border: 'none',
@@ -242,9 +253,10 @@ export default function V60Timer() {
 
       <div style={{ 
         width: '100%',
-        maxWidth: 400,
+        maxWidth: 'min(400px, 100%)',
         borderTop: '1px solid #333',
-        paddingTop: 24
+        paddingTop: 'clamp(16px, 4vw, 24px)',
+        flex: 1
       }}>
         {steps.map((step, i) => {
           const isDone = i < currentStepIndex;
@@ -256,10 +268,10 @@ export default function V60Timer() {
               style={{ 
                 display: 'flex',
                 alignItems: 'center',
-                padding: '12px 0',
+                padding: 'clamp(8px, 2vw, 12px) 0',
                 borderBottom: '1px solid #262626',
                 opacity: isDone ? 0.4 : isCurrent ? (isRunning && flash ? 1 : 0.5) : 0.6,
-                background: isCurrent && isRunning ? (flash ? (mode === 'iced' ? 'rgba(8,145,178,0.2)' : 'rgba(37,99,235,0.2)') : 'transparent') : 'transparent',
+                background: isCurrent && isRunning ? (flash ? (mode === 'iced' ? 'rgba(8,145,178,0.1)' : 'rgba(37,99,235,0.1)') : 'transparent') : 'transparent',
                 borderRadius: 4,
                 transition: 'opacity 0.2s, background 0.2s'
               }}
@@ -269,26 +281,27 @@ export default function V60Timer() {
                 height: 8,
                 borderRadius: '50%',
                 background: isCurrent ? (mode === 'iced' ? '#0891b2' : '#2563eb') : isDone ? '#22c55e' : '#444',
-                marginRight: 16,
+                marginRight: 'clamp(8px, 2vw, 16px)',
                 flexShrink: 0
               }} />
               <div style={{ 
-                width: 50, 
+                width: 'clamp(40px, 10vw, 50px)', 
                 color: '#888',
-                fontSize: 14,
+                fontSize: 'clamp(12px, 3vw, 14px)',
                 flexShrink: 0
               }}>
                 {formatTime(step.time)}
               </div>
               <div style={{ 
                 flex: 1,
-                fontSize: 14,
-                color: isCurrent ? 'white' : '#aaa'
+                fontSize: 'clamp(12px, 3vw, 14px)',
+                color: isCurrent ? 'white' : '#aaa',
+                paddingRight: 8
               }}>
                 {step.instruction}
               </div>
               <div style={{ 
-                fontSize: 14,
+                fontSize: 'clamp(12px, 3vw, 14px)',
                 color: '#666',
                 flexShrink: 0
               }}>
