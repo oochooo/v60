@@ -37,6 +37,7 @@ export default function V60Timer() {
   const [isRunning, setIsRunning] = useState(false);
   const [seconds, setSeconds] = useState(0);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  const [flash, setFlash] = useState(true);
   const intervalRef = useRef(null);
 
   const recipe = recipes[mode];
@@ -52,6 +53,14 @@ export default function V60Timer() {
       }, 1000);
     }
     return () => clearInterval(intervalRef.current);
+  }, [isRunning]);
+
+  useEffect(() => {
+    if (!isRunning) return;
+    const flashInterval = setInterval(() => {
+      setFlash(f => !f);
+    }, 500);
+    return () => clearInterval(flashInterval);
   }, [isRunning]);
 
   useEffect(() => {
@@ -81,7 +90,6 @@ export default function V60Timer() {
   };
 
   const currentStep = steps[currentStepIndex];
-  const nextStep = steps[currentStepIndex + 1];
 
   return (
     <div style={{ 
@@ -145,7 +153,6 @@ export default function V60Timer() {
       </p>
       <p style={{ color: '#666', fontSize: 12, }}>
         Grind: {recipe.grind}
-        
       </p>
 
       <div style={{ 
@@ -159,13 +166,6 @@ export default function V60Timer() {
       }}>
         {formatTime(seconds)}
       </div>
-
-{/* 
-      {nextStep && (
-        <div style={{ color: '#888', marginBottom: 40, textAlign: 'center' }}>
-          Next at {formatTime(nextStep.time)}: {nextStep.instruction}
-        </div>
-      )} */}
 
       <div style={{ marginBottom: 40 }}>
         {!isRunning ? (
@@ -221,7 +221,10 @@ export default function V60Timer() {
                 alignItems: 'center',
                 padding: '12px 0',
                 borderBottom: '1px solid #262626',
-                opacity: isDone ? 0.4 : isCurrent ? 1 : 0.6
+                opacity: isDone ? 0.4 : isCurrent ? (isRunning && flash ? 1 : 0.5) : 0.6,
+                background: isCurrent && isRunning ? (flash ? (mode === 'iced' ? 'rgba(8,145,178,0.2)' : 'rgba(37,99,235,0.2)') : 'transparent') : 'transparent',
+                borderRadius: 4,
+                transition: 'opacity 0.2s, background 0.2s'
               }}
             >
               <div style={{
