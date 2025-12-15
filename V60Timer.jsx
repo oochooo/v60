@@ -77,6 +77,31 @@ function PillToggle({ options, value, onChange, colors }) {
   );
 }
 
+function NumberInput({ value, onChange, label, unit }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <span style={{ color: '#888', fontSize: 14, width: 50 }}>{label}</span>
+      <input
+        type="number"
+        value={value}
+        onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
+        style={{
+          background: '#333',
+          border: 'none',
+          outline: 'none',
+          borderRadius: 8,
+          padding: '8px 12px',
+          color: 'white',
+          fontSize: 14,
+          width: 70,
+          textAlign: 'right'
+        }}
+      />
+      <span style={{ color: '#666', fontSize: 14 }}>{unit}</span>
+    </div>
+  );
+}
+
 export default function V60Timer() {
   const [mode, setMode] = useState('hot');
   const [multiplier, setMultiplier] = useState(0.5);
@@ -84,13 +109,26 @@ export default function V60Timer() {
   const [seconds, setSeconds] = useState(0);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [flash, setFlash] = useState(true);
+  const [coffee, setCoffee] = useState(recipes.hot.coffee * 0.5);
+  const [water, setWater] = useState(recipes.hot.water * 0.5);
+  const [ice, setIce] = useState(recipes.hot.ice * 0.5);
   const intervalRef = useRef(null);
 
   const recipe = recipes[mode];
-  const coffee = recipe.coffee * multiplier;
-  const water = recipe.water * multiplier;
-  const ice = recipe.ice * multiplier;
-  const steps = recipe.baseSteps.map(s => ({ ...s, water: s.water * multiplier }));
+  
+  // Update values when mode or multiplier changes
+  useEffect(() => {
+    setCoffee(recipe.coffee * multiplier);
+    setWater(recipe.water * multiplier);
+    setIce(recipe.ice * multiplier);
+  }, [mode, multiplier]);
+
+  // Calculate scale factor based on water input vs base recipe
+  const scaleFactor = water / (recipe.water * multiplier) || 1;
+  const steps = recipe.baseSteps.map(s => ({ 
+    ...s, 
+    water: Math.round(s.water * multiplier * scaleFactor) 
+  }));
 
   const lastStepTime = steps[steps.length - 1].time;
   const isComplete = isRunning && currentStepIndex === steps.length - 1 && seconds >= lastStepTime + 5;
@@ -144,8 +182,6 @@ export default function V60Timer() {
     clearInterval(intervalRef.current);
   };
 
-  const currentStep = steps[currentStepIndex];
-
   return (
     <div style={{ 
       fontFamily: 'system-ui', 
@@ -166,45 +202,45 @@ export default function V60Timer() {
       {!isRunning && (
         <>
           <h1 style={{ 
-            
             fontWeight: 300, 
             fontSize: 'clamp(20px, 5vw, 24px)' 
           }}>
             James Hoffmann's V60 technique
           </h1>
-          <p style={{ color: '#545454ff', fontSize: '9px', textAlign: 'center',  }}>
-  Perpetually free, but I'm more than happy if you want to buy me a coffee:
-  <br />
-  <span 
-    onClick={() => navigator.clipboard.writeText('0x1b41104f73732a532fa95feb177360ffc8c21f3a')}
-    style={{ 
-      cursor: 'pointer',
-      display: 'inline-flex',
-      alignItems: 'center',
-      gap: 4,marginBottom: 16,
-    }}
-  >
-    0x1b41104f73732a532fa95feb177360ffc8c21f3a (Ethereum / Arbitrum)
-    <svg 
-      width="12" 
-      height="12" 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      stroke="currentColor" 
-      strokeWidth="2"
-      style={{ opacity: 0.6 }}
-    >
-      <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
-      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-    </svg>
-  </span>
-</p>
+          <p style={{ color: '#545454ff', fontSize: '9px', textAlign: 'center' }}>
+            Perpetually free, but I'm more than happy if you want to buy me a coffee:
+            <br />
+            <span 
+              onClick={() => navigator.clipboard.writeText('0x1b41104f73732a532fa95feb177360ffc8c21f3a')}
+              style={{ 
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 4,
+                marginBottom: 16,
+              }}
+            >
+              0x1b41104f73732a532fa95feb177360ffc8c21f3a (Ethereum / Arbitrum)
+              <svg 
+                width="12" 
+                height="12" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2"
+                style={{ opacity: 0.6 }}
+              >
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+              </svg>
+            </span>
+          </p>
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 16 }}>
             <PillToggle
               options={[
                 { value: 'hot', label: '☕' },
-                { value: 'iced', label: '🧊 ' }
+                { value: 'iced', label: '🧊' }
               ]}
               value={mode}
               onChange={setMode}
@@ -221,10 +257,14 @@ export default function V60Timer() {
             />
           </div>
           
-            
-          <p style={{ color: '#888', fontSize: 'clamp(14px, 3vw, 16px)' }}>
-            {coffee}g beans • {water}g water{ice > 0 && ` • ${ice}g ice`}
-          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 }}>
+            <NumberInput label="Beans" value={coffee} onChange={setCoffee} unit="g" />
+            <NumberInput label="Water" value={water} onChange={setWater} unit="g" />
+            {mode === 'iced' && (
+              <NumberInput label="Ice" value={ice} onChange={setIce} unit="g" />
+            )}
+          </div>
+
           <p style={{ color: '#666', fontSize: 'clamp(11px, 2.5vw, 12px)' }}>
             Grind: {recipe.grind}
           </p>
