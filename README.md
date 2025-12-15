@@ -1,1 +1,1 @@
-# v60
+deployed at https://oochooo.github.io/v60/
