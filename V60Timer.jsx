@@ -195,7 +195,7 @@ export default function V60Timer() {
           </div>
           
           <p style={{ color: '#888', fontSize: 'clamp(14px, 3vw, 16px)' }}>
-            {coffee}g beans • {water}g water {ice > 0 && ` • ${ice}g ice`}
+            {coffee}g beans • {ice ==0 ?water: water - ice}g water {ice > 0 && ` • ${ice}g ice`}
           </p>
           <p style={{ color: '#666', fontSize: 'clamp(11px, 2.5vw, 12px)' }}>
             Grind: {recipe.grind}
