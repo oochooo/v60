@@ -1,1 +1,3 @@
 docker build -t v60 . && docker run -p 5173:5173 -v $(pwd)/V60Timer.jsx:/app/src/App.jsx v60
+
+# tested on mac os

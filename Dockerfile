@@ -9,3 +9,5 @@ COPY V60Timer.jsx src/App.jsx
 EXPOSE 5173
 
 CMD ["npm", "run", "dev", "--", "--host"]
+
+# macos via orbstack
