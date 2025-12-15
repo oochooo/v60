@@ -20,11 +20,11 @@ const recipes = {
       { time: 0, instruction: "Pour for bloom", water: 90 },
       { time: 10, instruction: "Stir bloom", water: 90 },
       { time: 20, instruction: "Let bloom", water: 90 },
-      { time: 45, instruction: "Pour the rest", water: 500 },
-      { time: 60*2.5, instruction: "Swirl and serve on ice", water: 500 },
+      { time: 45, instruction: "Pour the rest", water: 300 },
+      { time: 60*2.5, instruction: "Swirl and serve on ice", water: 300 },
     ],
     coffee: 32.5,
-    water: 500,
+    water: 300,
     ice: 200,
     grind: "Fine (toward aeropress)"
   }
@@ -166,12 +166,39 @@ export default function V60Timer() {
       {!isRunning && (
         <>
           <h1 style={{ 
-            marginBottom: 16, 
+            
             fontWeight: 300, 
             fontSize: 'clamp(20px, 5vw, 24px)' 
           }}>
             James Hoffmann's V60 technique
           </h1>
+          <p style={{ color: '#999898ff', fontSize: '9px', textAlign: 'center',  }}>
+  Perpetually free, but I'm more than happy if you want to buy me a coffee:
+  <br />
+  <span 
+    onClick={() => navigator.clipboard.writeText('0x1b41104f73732a532fa95feb177360ffc8c21f3a')}
+    style={{ 
+      cursor: 'pointer',
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: 4,marginBottom: 16,
+    }}
+  >
+    0x1b41104f73732a532fa95feb177360ffc8c21f3a (Ethereum / Arbitrum)
+    <svg 
+      width="12" 
+      height="12" 
+      viewBox="0 0 24 24" 
+      fill="none" 
+      stroke="currentColor" 
+      strokeWidth="2"
+      style={{ opacity: 0.6 }}
+    >
+      <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+    </svg>
+  </span>
+</p>
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 16 }}>
             <PillToggle
@@ -186,16 +213,17 @@ export default function V60Timer() {
             
             <PillToggle
               options={[
-                { value: 0.5, label: '1x' },
-                { value: 1, label: '2x' }
+                { value: 0.5, label: '1/2' },
+                { value: 1, label: '1' }
               ]}
               value={multiplier}
               onChange={setMultiplier}
             />
           </div>
           
+            
           <p style={{ color: '#888', fontSize: 'clamp(14px, 3vw, 16px)' }}>
-            {coffee}g beans • {ice ==0 ?water: water - ice}g water {ice > 0 && ` • ${ice}g ice`}
+            {coffee}g beans • {water}g water{ice > 0 && ` • ${ice}g ice`}
           </p>
           <p style={{ color: '#666', fontSize: 'clamp(11px, 2.5vw, 12px)' }}>
             Grind: {recipe.grind}
