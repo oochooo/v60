@@ -172,7 +172,7 @@ export default function V60Timer() {
           }}>
             James Hoffmann's V60 technique
           </h1>
-          <p style={{ color: '#999898ff', fontSize: '9px', textAlign: 'center',  }}>
+          <p style={{ color: '#545454ff', fontSize: '9px', textAlign: 'center',  }}>
   Perpetually free, but I'm more than happy if you want to buy me a coffee:
   <br />
   <span 
