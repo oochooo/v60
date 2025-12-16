@@ -102,26 +102,46 @@ function NumberInput({ value, onChange, label, unit }) {
   );
 }
 
+function SavePreset(mode, multiplier,coffee, water, ice)
+{
+  localStorage.setItem('modePreset', JSON.stringify(mode));
+  localStorage.setItem('multiplierPreset', JSON.stringify(multiplier));
+  localStorage.setItem('beanPreset', JSON.stringify(coffee));
+  localStorage.setItem('waterPreset', JSON.stringify(water));
+  localStorage.setItem('icePreset', JSON.stringify(ice));
+}
+
+
 export default function V60Timer() {
-  const [mode, setMode] = useState('hot');
-  const [multiplier, setMultiplier] = useState(0.5);
+  const [usingPreset, setUsingPreset] = useState(() => loadUsingPreset());
+  const [mode, setMode] = useState(() => loadPreset('modePreset', 'hot'));
+  const [multiplier, setMultiplier] = useState(() => loadPreset('multiplierPreset', 0.5));
   const [isRunning, setIsRunning] = useState(false);
   const [seconds, setSeconds] = useState(0);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [flash, setFlash] = useState(true);
-  const [coffee, setCoffee] = useState(recipes.hot.coffee * 0.5);
-  const [water, setWater] = useState(recipes.hot.water * 0.5);
-  const [ice, setIce] = useState(recipes.hot.ice * 0.5);
+
+  const [coffee, setCoffee] = useState(() => loadPreset('beanPreset', recipes.hot.coffee * 0.5));
+
+  const [water, setWater] = useState(() => loadPreset('waterPreset', recipes.hot.water * 0.5));
+  const [ice, setIce] = useState(() => loadPreset('icePreset', recipes.hot.water * 0.5));
   const intervalRef = useRef(null);
 
   const recipe = recipes[mode];
-  
+
   // Update values when mode or multiplier changes
   useEffect(() => {
+    if(usingPreset)
+    {
+      loadAllPresets();
+      return;
+    }
+
     setCoffee(recipe.coffee * multiplier);
     setWater(recipe.water * multiplier);
     setIce(recipe.ice * multiplier);
-  }, [mode, multiplier]);
+  
+  }, [mode, multiplier, usingPreset]);
 
   // Calculate scale factor based on water input vs base recipe
   const scaleFactor = water / (recipe.water * multiplier) || 1;
@@ -181,6 +201,40 @@ export default function V60Timer() {
     setCurrentStepIndex(0);
     clearInterval(intervalRef.current);
   };
+  const handleCheckBox = () => {
+    setUsingPreset(!usingPreset)
+    localStorage.setItem('usingPreset', JSON.stringify(!usingPreset));
+  }
+
+  function loadPreset(key, defaultValue) {
+    const savedPreset = localStorage.getItem(key)
+
+    if (savedPreset === null || savedPreset === 'undefined' || !usingPreset) 
+    {
+      return defaultValue;
+    }
+
+    return JSON.parse(savedPreset)
+  }
+
+  function loadUsingPreset() {
+    const savedPreset = localStorage.getItem("usingPreset")
+
+    if (savedPreset === null || savedPreset === 'undefined') 
+    {
+      return false;
+    }
+
+    return JSON.parse(savedPreset)
+  }
+  function loadAllPresets()
+  {
+    setMode(loadPreset('modePreset', 'hot'));
+    setMultiplier(loadPreset('multiplierPreset', 0.5));
+    setCoffee(loadPreset('beanPreset', recipes.hot.coffee * 0.5));
+    setWater(loadPreset('waterPreset', recipes.hot.coffee * 0.5));
+    setIce(loadPreset('icePreset', recipes.hot.coffee * 0.5));
+  }
 
   return (
     <div style={{ 
@@ -263,8 +317,22 @@ export default function V60Timer() {
             {mode === 'iced' && (
               <NumberInput label="Ice" value={ice} onChange={setIce} unit="g" />
             )}
+            <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'center', marginTop: '10px'}}>
+              <button onClick={() => SavePreset(mode, multiplier, coffee, water, ice)} style={{
+                background: '#2563eb',
+                borderRadius: 16,
+                width: 'fit-content'}}>Save Preset</button>
+            </div>
+            <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'center'}}>
+              <button onClick={handleCheckBox} style={{marginRight: 2, background: 'transparent', border: 'none', outline: 'none'}}>Use Preset</button>
+              <input
+                type="checkbox"
+                checked={usingPreset}
+                onChange={handleCheckBox}
+              />
+            </div>
           </div>
-
+          
           <p style={{ color: '#666', fontSize: 'clamp(11px, 2.5vw, 12px)' }}>
             Grind: {recipe.grind}
           </p>
